@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İş Ara</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/themes.css">
+    <style>
+        .search-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem;
+            margin: 1rem auto 3rem auto;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .search-box:hover, .search-box:focus-within {
+            box-shadow: 0 15px 40px rgba(76, 175, 80, 0.2);
+            border-color: #4CAF50;
+            transform: translateY(-2px);
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1.2rem 1.2rem 1.2rem 3.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: #999;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus::placeholder {
+            opacity: 0.7;
+            transform: translateX(10px);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.2rem;
+            color: #4CAF50;
+            font-size: 1.4rem;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus-within .search-icon {
+            transform: scale(1.1);
+            color: #45a049;
+        }
+
+        @media (max-width: 768px) {
+            .search-container {
+                padding: 0.5rem;
+            }
+
+            .search-box {
+                margin: 0.5rem auto 2rem auto;
+            }
+
+            .search-input {
+                font-size: 1rem;
+                padding: 1rem 1rem 1rem 3rem;
+            }
+        }
+
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
+        }
+
+        .job-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .job-header {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            padding: 1.5rem;
+            color: white;
+        }
+
+        .employer-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .employer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+
+        .employer-details h3 {
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .job-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .job-content {
+            padding: 1.5rem;
+        }
+
+        .job-title {
+            font-size: 1.4rem;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .job-description {
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .job-meta {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .no-results i {
+            font-size: 3rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .no-results h3 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .no-results p {
+            color: #666;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-btn, .logout-btn {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover, .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            margin: 2rem auto;
+            max-width: 400px;
+        }
+
+        .error-message i {
+            font-size: 3rem;
+            color: #ff4444;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <div class="search-box">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-input" 
+                    placeholder="İş adı veya açıklama ara..."
+                    oninput="performSearch()"
+                    autocomplete="off"
+                >
+            </div>
+        </div>
+        
+        <div class="jobs-grid" id="searchResults">
+            <!-- İş kartları buraya gelecek -->
+        </div>
+    </div>
+
+    <div class="navbar">
+        <div class="nav-content">
+            <a href="homepage.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Geri
+            </a>
+          
+        </div>
+    </div>
+
+    <script type="module">
+        import { firestore, auth } from './assets/js/firebaseConfig.js';
+        import { collection, getDocs, doc as firestoreDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // Sayfa yüklendiğinde oturum kontrolü yap
+        document.addEventListener('DOMContentLoaded', () => {
+            onAuthStateChanged(auth, (user) => {
+                if (!user) {
+                    // Kullanıcı giriş yapmamışsa login sayfasına yönlendir
+                    window.location.href = 'login.html';
+                    return;
+                }
+                // Kullanıcı giriş yapmışsa işlemlere devam et
+                initializeSearch();
+            });
+        });
+
+        function initializeSearch() {
+            let allJobs = [];
+
+            // Tüm işleri getir
+            const loadJobs = async () => {
+                try {
+                    const querySnapshot = await getDocs(collection(firestore, "jobs"));
+                    allJobs = [];
+                    querySnapshot.forEach(doc => {
+                        allJobs.push({ id: doc.id, ...doc.data() });
+                    });
+                } catch (error) {
+                    console.error('Veri yükleme hatası:', error);
+                    showError('Veriler yüklenirken bir hata oluştu');
+                }
+            };
+
+            // İlk yüklemeyi yap
+            loadJobs();
+
+            // Arama fonksiyonunu global scope'a ekle
+            window.performSearch = () => {
+                const keyword = document.getElementById('searchInput').value.toLowerCase();
+                
+                if (keyword.length === 0) {
+                    document.getElementById('searchResults').innerHTML = '';
+                    return;
+                }
+
+                const filteredJobs = allJobs.filter(job => 
+                    job.jobName.toLowerCase().includes(keyword) || 
+                    job.jobDescription.toLowerCase().includes(keyword) ||
+                    job.category.toLowerCase().includes(keyword)
+                );
+
+                displayResults(filteredJobs);
+            };
+        }
+
+        // Hata gösterme fonksiyonu
+        function showError(message) {
+            const container = document.getElementById('searchResults');
+            container.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <h3>Hata</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        async function displayResults(results) {
+            const container = document.getElementById('searchResults');
+            
+            if (results.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h3>Sonuç Bulunamadı</h3>
+                        <p>Farklı anahtar kelimeler deneyebilirsiniz</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            
+            for (const job of results) {
+                try {
+                    // Kullanıcı bilgilerini çek
+                    const userRef = firestoreDoc(firestore, 'users', job.employerId);
+                    const userSnapshot = await getDoc(userRef);
+                    const userData = userSnapshot.exists() ? userSnapshot.data() : {};
+
+                    const jobCard = `
+                        <div class="job-card" onclick="window.location.href='job-detail.html?id=${job.id}'" 
+                             style="animation-delay: ${results.indexOf(job) * 0.1}s">
+                            <div class="job-header">
+                                <div class="employer-info">
+                                    <img src="${userData.photoURL || 'assets/images/default-avatar.png'}" 
+                                         alt="Profil" 
+                                         class="employer-avatar">
+                                    <div class="employer-details">
+                                        <h3>${userData.username || 'İsimsiz Kullanıcı'}</h3>
+                                    </div>
+                                </div>
+                                <div class="job-price">₺${job.jobPrice?.toLocaleString('tr-TR')}</div>
+                            </div>
+                            <div class="job-content">
+                                <h4>${job.jobName}</h4>
+                                <p>${job.jobDescription}</p>
+                                <div class="job-meta">
+                                    <span class="category">
+                                        <i class="fas fa-tag"></i> ${job.category}
+                                    </span>
+                                    <span class="status ${job.status}">
+                                        <i class="fas fa-circle"></i> ${job.status === 'active' ? 'Aktif' : 'Pasif'}
+                                    </span>
+                                    <span class="date">
+                                        <i class="fas fa-clock"></i> 
+                                        ${new Date(job.createdAt).toLocaleDateString('tr-TR')}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.innerHTML += jobCard;
+                } catch (error) {
+                    console.error('İş kartı oluşturulurken hata:', error);
+                }
+            }
+        }
+    </script>
+</body>
+</html> 

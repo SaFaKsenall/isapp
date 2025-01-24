@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login/Register</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            position: relative;
+            width: 400px;
+            height: 620px;
+        }
+
+        .container .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .container .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card .face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .card .back {
+            transform: rotateY(180deg);
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .social-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .social-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .social-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .facebook { background: #4267B2; }
+        .google { background: #DB4437; }
+        .twitter { background: #1DA1F2; }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            color: #666;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            width: 100%;
+            height: 50px;
+            padding: 10px 20px 10px 50px;
+            font-size: 16px;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.9);
+        }
+
+        .form-control:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 15px rgba(118,75,162,0.2);
+            outline: none;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus + .input-icon {
+            color: #764ba2;
+        }
+
+        .btn {
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(118,75,162,0.3);
+        }
+
+        .bottom-text {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: #666;
+        }
+
+        .link {
+            color: #764ba2;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .link:hover {
+            color: #667eea;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                width: 100%;
+                height: 550px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <!-- Register Form (Front) -->
+            <div class="face front">
+                <h2 class="title">Create Account</h2>
+                
+                <div class="social-buttons">
+                    <button class="social-button facebook" onclick="signInWithFacebook()">
+                        <i class="fab fa-facebook-f"></i>
+                    </button>
+                    <button class="social-button google" onclick="signInWithGoogle()">
+                        <i class="fab fa-google"></i>
+                    </button>
+                    <button class="social-button twitter" onclick="signInWithTwitter()">
+                        <i class="fab fa-twitter"></i>
+                    </button>
+                </div>
+
+                <div class="divider">or register with email</div>
+
+                <form id="registerForm">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="fullName" placeholder="Full Name" required>
+                        <i class="fas fa-user input-icon"></i>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="email" class="form-control" id="registerEmail" placeholder="Email address" required>
+                        <i class="fas fa-envelope input-icon"></i>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="password" class="form-control" id="registerPassword" placeholder="Password" required>
+                        <i class="fas fa-lock input-icon"></i>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password" required>
+                        <i class="fas fa-lock input-icon"></i>
+                    </div>
+
+                    <button type="submit" class="btn">Register</button>
+                </form>
+
+                <p class="bottom-text">
+                    Already have an account? <span class="link" onclick="flipCard()">Sign In</span>
+                </p>
+            </div>
+
+            <!-- Login Form (Back) -->
+            <div class="face back">
+                <h2 class="title">Welcome Back</h2>
+                
+                <div class="social-buttons">
+                    <button class="social-button facebook" onclick="signInWithFacebook()">
+                        <i class="fab fa-facebook-f"></i>
+                    </button>
+                    <button class="social-button google" onclick="signInWithGoogle()">
+                        <i class="fab fa-google"></i>
+                    </button>
+                    <button class="social-button twitter" onclick="signInWithTwitter()">
+                        <i class="fab fa-twitter"></i>
+                    </button>
+                </div>
+
+                <div class="divider">or login with email</div>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <input type="email" class="form-control" id="loginEmail" placeholder="Email address" required>
+                        <i class="fas fa-envelope input-icon"></i>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="password" class="form-control" id="loginPassword" placeholder="Password" required>
+                        <i class="fas fa-lock input-icon"></i>
+                    </div>
+
+                    <button type="submit" class="btn">Login</button>
+                </form>
+
+                <p class="bottom-text">
+                    Don't have an account? <span class="link" onclick="flipCard()">Sign Up</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function flipCard() {
+            document.querySelector('.card').classList.toggle('flipped');
+        }
+    </script>
+
+    <script type="module">
+        import { auth, firestore } from './assets/js/firebaseConfig.js';
+        import { 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword,
+            GoogleAuthProvider, 
+            FacebookAuthProvider, 
+            TwitterAuthProvider, 
+            signInWithPopup,
+            updateProfile,
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Sosyal medya sağlayıcıları
+        const googleProvider = new GoogleAuthProvider();
+        const facebookProvider = new FacebookAuthProvider();
+        const twitterProvider = new TwitterAuthProvider();
+
+        // Sosyal medya ile giriş fonksiyonları
+        window.signInWithGoogle = async () => {
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                if (result.user) {
+                    // Kullanıcı bilgilerini Firestore'a kaydet
+                    await setDoc(doc(firestore, 'users', result.user.uid), {
+                        fullName: result.user.displayName,
+                        email: result.user.email,
+                        createdAt: new Date().toISOString(),
+                        userId: result.user.uid
+                    }, { merge: true });
+                    window.location.replace('./homepage.html');
+                }
+            } catch (error) {
+                console.error('Google login error:', error);
+                alert('Google ile giriş hatası: ' + error.message);
+            }
+        };
+
+        window.signInWithFacebook = async () => {
+            try {
+                const result = await signInWithPopup(auth, facebookProvider);
+                window.location.replace('./homepage.html');
+            } catch (error) {
+                alert('Facebook ile giriş hatası: ' + error.message);
+            }
+        };
+
+        window.signInWithTwitter = async () => {
+            try {
+                const result = await signInWithPopup(auth, twitterProvider);
+                window.location.replace('./homepage.html');
+            } catch (error) {
+                alert('Twitter ile giriş hatası: ' + error.message);
+            }
+        };
+
+        // Auth kontrolü
+        const qrSessionData = localStorage.getItem('qrSession');
+        const currentUser = auth.currentUser;
+
+        // Eğer QR session veya kullanıcı varsa direkt homepage'e yönlendir
+        if (qrSessionData || currentUser) {
+            window.location.href = './homepage.html';
+        }
+
+        // Register Form
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert('Şifreler eşleşmiyor!');
+                return;
+            }
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                
+                await updateProfile(userCredential.user, {
+                    displayName: fullName
+                });
+
+                await setDoc(doc(firestore, 'users', userCredential.user.uid), {
+                    fullName: fullName,
+                    email: email,
+                    createdAt: new Date().toISOString(),
+                    userId: userCredential.user.uid
+                });
+
+                alert('Kayıt başarılı! Anasayfaya yönlendiriliyorsunuz...');
+                window.location.replace('./homepage.html');
+            } catch (error) {
+                console.error('Register error:', error);
+                alert('Kayıt hatası: ' + error.message);
+            }
+        });
+
+        // Login Form
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                if (userCredential.user) {
+                    console.log('Giriş başarılı:', userCredential.user.email);
+                    window.location.replace('./homepage.html');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                if (error.code === 'auth/invalid-credential') {
+                    alert('Hatalı email veya şifre!');
+                } else {
+                    alert('Giriş hatası: ' + error.message);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

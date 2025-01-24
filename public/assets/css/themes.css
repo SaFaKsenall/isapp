@@ -1,0 +1,256 @@
+/* Tema değişkenleri */
+:root[data-theme="light"] {
+    --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --bg-card: rgba(255, 255, 255, 0.9);
+    --bg-sidebar: rgba(255, 255, 255, 0.1);
+    --text-primary: #333;
+    --text-secondary: #666;
+    --text-light: #fff;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --shadow-color: rgba(0, 0, 0, 0.2);
+    --hover-color: rgba(255, 255, 255, 0.2);
+    --button-bg: rgba(118, 75, 162, 0.9);
+    --button-hover: rgba(118, 75, 162, 1);
+    --danger-button: rgba(220, 53, 69, 0.9);
+    --danger-button-hover: rgba(220, 53, 69, 1);
+}
+
+:root[data-theme="dark"] {
+    --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --bg-card: rgba(40, 40, 40, 0.95);
+    --bg-sidebar: rgba(30, 30, 30, 0.95);
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --text-light: #ffffff;
+    --border-color: rgba(255, 255, 255, 0.15);
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    --hover-color: rgba(255, 255, 255, 0.1);
+    --card-text: #ffffff;
+    --active-menu-bg: rgba(255, 255, 255, 0.15);
+    --active-menu-text: #ffffff;
+    --input-bg: rgba(50, 50, 50, 0.95);
+    --input-text: #ffffff;
+    --button-bg: rgba(118, 75, 162, 0.9);
+    --button-hover: rgba(118, 75, 162, 1);
+    --danger-button: rgba(220, 53, 69, 0.9);
+    --danger-button-hover: rgba(220, 53, 69, 1);
+}
+
+/* Ana stiller */
+body {
+    background: var(--bg-gradient) !important;
+    color: var(--text-primary) !important;
+}
+
+.navbar, .sidebar {
+    background: var(--bg-sidebar) !important;
+    color: var(--text-light) !important;
+}
+
+.welcome-card, .settings-card, .dashboard-card, .job-card-large {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    box-shadow: 0 8px 20px var(--shadow-color) !important;
+}
+
+.detail-label, .setting-label {
+    color: var(--text-secondary) !important;
+}
+
+.detail-value {
+    color: var(--text-primary) !important;
+}
+
+/* Yazı Boyutları */
+[data-font-size="small"] {
+    font-size: 14px !important;
+}
+
+[data-font-size="medium"] {
+    font-size: 16px !important;
+}
+
+[data-font-size="large"] {
+    font-size: 18px !important;
+}
+
+/* Diğer elementler için tema desteği */
+.setting-input, select, input {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+button, .btn {
+    background: var(--bg-sidebar) !important;
+    color: var(--text-light) !important;
+}
+
+.danger-zone {
+    border-color: #dc3545 !important;
+}
+
+/* Menü ve linkler */
+.sidebar-menu a {
+    color: var(--text-light) !important;
+}
+
+.sidebar-menu a:hover {
+    background: var(--hover-color) !important;
+}
+
+.sidebar-menu a.active {
+    background: var(--active-menu-bg) !important;
+    color: var(--active-menu-text) !important;
+}
+
+/* Profil ve kart içerikleri için yeni stiller */
+[data-theme="dark"] .welcome-card,
+[data-theme="dark"] .settings-card,
+[data-theme="dark"] .dashboard-card,
+[data-theme="dark"] .job-card-large {
+    background: var(--bg-card) !important;
+    color: var(--card-text) !important;
+}
+
+[data-theme="dark"] .detail-label {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .detail-value {
+    color: var(--text-light) !important;
+}
+
+[data-theme="dark"] .setting-label {
+    color: var(--text-light) !important;
+}
+
+[data-theme="dark"] .card-header h2 {
+    color: var(--text-light) !important;
+}
+
+[data-theme="dark"] .job-title,
+[data-theme="dark"] .job-description {
+    color: var(--text-light) !important;
+}
+
+/* İnput ve select elementleri için koyu tema düzeltmeleri */
+[data-theme="dark"] .setting-input,
+[data-theme="dark"] select,
+[data-theme="dark"] input {
+    background: var(--input-bg) !important;
+    color: var(--input-text) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Profil kartı için koyu tema düzeltmeleri */
+[data-theme="dark"] .welcome-card {
+    background: var(--bg-card) !important;
+}
+
+[data-theme="dark"] .detail-item {
+    background: var(--input-bg) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .welcome-title {
+    color: var(--text-light) !important;
+}
+
+/* Profil Bilgileri başlığı için düzeltme */
+[data-theme="dark"] .welcome-title,
+[data-theme="dark"] h1,
+[data-theme="dark"] h2 {
+    color: var(--text-light) !important;
+}
+
+/* Hesap Ayarları için özel stiller */
+.settings-card {
+    padding: 20px !important;
+    margin-bottom: 20px !important;
+}
+
+.setting-item {
+    margin-bottom: 15px !important;
+    padding: 10px 0 !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.setting-label {
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    margin-bottom: 8px !important;
+    display: block !important;
+}
+
+/* Butonlar için yeni stiller */
+.setting-button {
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    border: none !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    background: var(--button-bg) !important;
+    color: var(--text-light) !important;
+    width: 100% !important;
+    margin-top: 5px !important;
+}
+
+.setting-button:hover {
+    background: var(--button-hover) !important;
+    transform: translateY(-1px) !important;
+}
+
+.setting-button.danger {
+    background: var(--danger-button) !important;
+}
+
+.setting-button.danger:hover {
+    background: var(--danger-button-hover) !important;
+}
+
+/* Hesap Dondur bölümü için özel stil */
+.danger-zone {
+    margin-top: 20px !important;
+    padding-top: 20px !important;
+    border-top: 2px dashed var(--danger-button) !important;
+}
+
+[data-theme="dark"] .danger-zone {
+    border-top-color: var(--danger-button) !important;
+}
+
+/* Hesap Ayarları başlığı */
+.settings-card h2 {
+    color: var(--text-primary) !important;
+    margin-bottom: 20px !important;
+    font-size: 20px !important;
+}
+
+/* Koyu tema için hesap ayarları düzeltmeleri */
+[data-theme="dark"] .settings-card {
+    background: var(--bg-card) !important;
+}
+
+[data-theme="dark"] .setting-label {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .setting-button {
+    background: var(--button-bg) !important;
+    color: var(--text-light) !important;
+}
+
+[data-theme="dark"] .setting-button:hover {
+    background: var(--button-hover) !important;
+}
+
+[data-theme="dark"] .setting-button.danger {
+    background: var(--danger-button) !important;
+}
+
+[data-theme="dark"] .setting-button.danger:hover {
+    background: var(--danger-button-hover) !important;
+} 

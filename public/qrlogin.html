@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Kod ile Giriş</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 400px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 30px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .qr-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px auto;
+            max-width: 250px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .instructions {
+            margin: 30px 0;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .steps {
+            text-align: left;
+            margin: 20px 0;
+            padding-left: 20px;
+        }
+
+        .steps li {
+            margin: 10px 0;
+            color: #555;
+        }
+
+        #qrStatus {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .back-link {
+            color: #764ba2;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">QR Kod ile Giriş</h1>
+        
+        <div class="instructions">
+            <p>Mobil uygulamadan QR kodu taratarak giriş yapabilirsiniz.</p>
+            <ol class="steps">
+                <li>Mobil uygulamayı açın</li>
+                <li>QR Kod Tarama butonuna tıklayın</li>
+                <li>Kamerayı QR koda doğrultun</li>
+            </ol>
+        </div>
+
+        <div class="qr-container">
+            <div id="qrCode"></div>
+        </div>
+
+        <div id="qrStatus" class="status-pending">
+            QR kod bekleniyor...
+        </div>
+
+        <button id="refreshBtn" class="refresh-btn" onclick="window.location.reload()">
+            Yeni QR Kod Oluştur
+        </button>
+
+        <a href="register.html" class="back-link">
+            <i class="fas fa-arrow-left"></i> Giriş sayfasına dön
+        </a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script type="module">
+        import { auth, firestore } from './assets/js/firebaseConfig.js';
+        import { signInWithCustomToken, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, setDoc, onSnapshot, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const qrStatus = document.getElementById('qrStatus');
+        const refreshBtn = document.getElementById('refreshBtn');
+        let qrSessionUnsubscribe = null;
+
+        function updateStatus(message, type = 'pending') {
+            qrStatus.className = `status-${type}`;
+            qrStatus.textContent = message;
+        }
+
+        function generateSessionId() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        async function initQRLogin() {
+            const sessionId = generateSessionId();
+            
+            // QR kodu oluştur
+            new QRCode(document.getElementById("qrCode"), {
+                text: sessionId,
+                width: 200,
+                height: 200
+            });
+
+            try {
+                // Session'ı Firestore'da oluştur
+                await setDoc(doc(firestore, 'qr_sessions', sessionId), {
+                    createdAt: serverTimestamp(),
+                    status: 'pending',
+                    expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 dakika
+                });
+
+                // Session'ı dinle
+                qrSessionUnsubscribe = onSnapshot(
+                    doc(firestore, 'qr_sessions', sessionId),
+                    async (snapshot) => {
+                        if (!snapshot.exists()) return;
+
+                        const data = snapshot.data();
+                        
+                        switch(data.status) {
+                            case 'pending':
+                                updateStatus('QR kod taranması bekleniyor...', 'pending');
+                                break;
+                            
+                            case 'completed':
+                                updateStatus('Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
+                                
+                                try {
+                                    console.log('QR Login Data:', {
+                                        email: data.userData.email,
+                                        userId: data.userId,
+                                        fullData: data
+                                    });
+
+                                    // Firestore'dan kullanıcı bilgilerini al
+                                    const userDoc = await getDoc(doc(firestore, 'users', data.userId));
+                                    if (!userDoc.exists()) {
+                                        throw new Error('Kullanıcı bulunamadı');
+                                    }
+
+                                    const userData = userDoc.data();
+                                    
+                                    // Kullanıcının şifresi ile giriş yap
+                                    try {
+                                        const userCredential = await signInWithEmailAndPassword(
+                                            auth, 
+                                            data.userData.email, 
+                                            userData.password || userData.tempPassword || 'default123' // Varsayılan şifre
+                                        );
+                                        console.log('Giriş başarılı:', userCredential.user);
+                                    } catch (signInError) {
+                                        console.error('Detaylı giriş hatası:', {
+                                            code: signInError.code,
+                                            message: signInError.message,
+                                            email: data.userData.email,
+                                            fullError: signInError
+                                        });
+                                        
+                                        // Eğer varsayılan şifre ile giriş başarısız olursa
+                                        if (signInError.code === 'auth/invalid-credential') {
+                                            try {
+                                                // Alternatif şifre ile dene
+                                                const userCredential = await signInWithEmailAndPassword(
+                                                    auth, 
+                                                    data.userData.email, 
+                                                    data.userId // Son çare olarak userId'yi dene
+                                                );
+                                                console.log('Alternatif giriş başarılı:', userCredential.user);
+                                            } catch (altError) {
+                                                console.error('Alternatif giriş hatası:', altError);
+                                                throw altError;
+                                            }
+                                        } else {
+                                            throw signInError;
+                                        }
+                                    }
+
+                                    // Session bilgisini localStorage'a kaydet
+                                    const sessionData = {
+                                        uid: data.userId,
+                                        userData: data.userData
+                                    };
+                                    console.log('Session data kaydediliyor:', sessionData);
+                                    localStorage.setItem('qrSession', JSON.stringify(sessionData));
+
+                                    console.log('Anasayfaya yönlendiriliyor...');
+                                    window.location.replace('./homepage.html');
+                                } catch (error) {
+                                    console.error('Genel hata detayları:', {
+                                        errorCode: error.code,
+                                        errorMessage: error.message,
+                                        fullError: error,
+                                        stack: error.stack
+                                    });
+                                    updateStatus(`Giriş işlemi başarısız oldu! Hata: ${error.message}`, 'error');
+                                    refreshBtn.style.display = 'inline-block';
+                                }
+                                break;
+                            
+                            case 'expired':
+                                updateStatus('QR kodun süresi doldu!', 'error');
+                                refreshBtn.style.display = 'inline-block';
+                                if (qrSessionUnsubscribe) {
+                                    qrSessionUnsubscribe();
+                                }
+                                break;
+                        }
+                    },
+                    (error) => {
+                        console.error('Session dinleme hatası:', error);
+                        updateStatus('Bir hata oluştu!', 'error');
+                        refreshBtn.style.display = 'inline-block';
+                    }
+                );
+
+                // 5 dakika sonra session'ı sonlandır
+                setTimeout(() => {
+                    if (qrSessionUnsubscribe) {
+                        qrSessionUnsubscribe();
+                        updateStatus('QR kodun süresi doldu!', 'error');
+                        refreshBtn.style.display = 'inline-block';
+                    }
+                }, 5 * 60 * 1000);
+
+            } catch (error) {
+                console.error('QR session oluşturma hatası:', error);
+                updateStatus('QR kod oluşturulamadı!', 'error');
+                refreshBtn.style.display = 'inline-block';
+            }
+        }
+
+        // Sayfa yüklendiğinde QR login'i başlat
+        document.addEventListener('DOMContentLoaded', initQRLogin);
+
+        // Sayfa kapandığında listener'ı temizle
+        window.addEventListener('beforeunload', () => {
+            if (qrSessionUnsubscribe) {
+                qrSessionUnsubscribe();
+            }
+        });
+    </script>
+</body>
+</html>

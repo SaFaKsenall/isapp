@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "30004554015",
+    "firebase_url": "https://jobapp-14c52-default-rtdb.firebaseio.com",
+    "project_id": "jobapp-14c52",
+    "storage_bucket": "jobapp-14c52.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:30004554015:android:60e9fca4b6589741b1e82a",
+        "android_client_info": {
+          "package_name": "isKey.app.tursaf"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAQSotcKrcbRPmDm1CVzn1AkSNnzqwIOc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

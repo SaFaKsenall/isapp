@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hesabı Dondur</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/themes.css">
+    <style>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .account-settings-container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 2rem;
+        }
+
+        .settings-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .warning-box {
+            background: rgba(220, 53, 69, 0.1);
+            border: 2px solid rgba(220, 53, 69, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            color: #dc3545;
+        }
+
+        .warning-box i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .warning-box h3 {
+            margin: 0 0 1rem 0;
+            color: #dc3545;
+        }
+
+        .warning-box p {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .setting-button.danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .setting-button.danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 1.8rem;
+        }
+
+        .form-label {
+            display: block;
+            color: #444;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid rgba(118, 75, 162, 0.2);
+            border-radius: 12px;
+            background: white;
+            color: #333;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #dc3545;
+            box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+        }
+
+        .password-requirements {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+        }
+
+        .password-requirements strong {
+            display: block;
+            margin-bottom: 0.8rem;
+            color: #444;
+        }
+
+        .password-requirements ul {
+            margin: 0;
+            padding-left: 1.2rem;
+            color: #666;
+        }
+
+        .password-requirements li {
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .password-requirements li:last-child {
+            margin-bottom: 0;
+        }
+    </style>
+    <script type="module">
+        import { 
+            auth,
+            firestore
+        } from './assets/js/firebaseConfig.js';
+        
+        import { 
+            signOut,
+            onAuthStateChanged,
+            EmailAuthProvider,
+            reauthenticateWithCredential
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        import {
+            doc,
+            updateDoc,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Kullanıcı oturum durumunu kontrol et
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                showAlert('Oturum süreniz dolmuş. Yönlendiriliyorsunuz...', 'error');
+                setTimeout(() => window.location.href = 'login.html', 2000);
+            }
+        });
+
+        window.handleDeactivate = async (e) => {
+            e.preventDefault();
+            const currentPassword = document.getElementById('currentPassword').value;
+
+            // Kullanıcıya son bir uyarı göster
+            const isConfirmed = confirm(
+                'DİKKAT: Bu işlem hesabınızı donduracaktır!\n\n' +
+                '- Hesabınıza erişiminiz engellenecek\n' +
+                '- Tekrar aktif etmek için yöneticilerle iletişime geçmeniz gerekecek\n' +
+                '- Tüm verileriniz korunacak ancak erişilemez olacak\n\n' +
+                'Bu işlemi gerçekleştirmek istediğinizden emin misiniz?'
+            );
+
+            if (!isConfirmed) {
+                return;
+            }
+
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    showAlert('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.', 'error');
+                    setTimeout(() => window.location.href = 'login.html', 2000);
+                    return;
+                }
+
+                // Mevcut şifre ile yeniden kimlik doğrulama
+                try {
+                    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+                    await reauthenticateWithCredential(user, credential);
+                } catch (error) {
+                    console.error('Kimlik doğrulama hatası:', error);
+                    showAlert('Mevcut şifreniz hatalı!', 'error');
+                    return;
+                }
+
+                // Firestore'da kullanıcı durumunu güncelle
+                await updateDoc(doc(firestore, 'users', user.uid), {
+                    isActive: false,
+                    deactivatedAt: serverTimestamp()
+                });
+
+                // Başarılı mesajı göster
+                showAlert('Hesabınız donduruldu. Yönlendiriliyorsunuz...', 'success');
+                
+                // Oturumu kapat
+                await signOut(auth);
+                
+                // 3 saniye sonra giriş sayfasına yönlendir
+                setTimeout(() => window.location.href = 'login.html', 3000);
+            } catch (error) {
+                console.error('Hesap dondurma hatası:', error);
+                showAlert(getErrorMessage(error), 'error');
+            }
+        };
+
+        window.showAlert = function(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            const existingAlert = document.querySelector('.alert');
+            if (existingAlert) existingAlert.remove();
+            
+            const form = document.querySelector('form');
+            form.insertBefore(alertDiv, form.firstChild);
+            
+            setTimeout(() => alertDiv.remove(), 5000);
+        };
+
+        function getErrorMessage(error) {
+            console.error('Firebase hatası:', error.code, error.message);
+            switch (error.code) {
+                case 'auth/wrong-password':
+                case 'auth/invalid-credential':
+                    return 'Mevcut şifreniz hatalı!';
+                case 'auth/requires-recent-login':
+                    return 'Güvenlik nedeniyle tekrar giriş yapmanız gerekiyor. Lütfen çıkış yapıp tekrar giriş yapın.';
+                case 'auth/too-many-requests':
+                    return 'Çok fazla deneme yaptınız. Lütfen bir süre bekleyin.';
+                case 'auth/network-request-failed':
+                    return 'İnternet bağlantınızı kontrol edin!';
+                default:
+                    return `Bir hata oluştu: ${error.message}`;
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="account-settings-container">
+        <a href="homepage.html" class="back-button">
+            <i class="fas fa-arrow-left"></i> Geri Dön
+        </a>
+        
+        <div class="settings-card">
+            <h2><i class="fas fa-user-slash"></i> Hesabı Dondur</h2>
+            
+            <div class="warning-box">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Önemli Uyarı!</h3>
+                <p>Bu işlem hesabınızı donduracaktır. Hesabınızı tekrar aktif etmek için yöneticilerle iletişime geçmeniz gerekecektir. Bu işlem önerilmez ve geri alınması zaman alabilir.</p>
+            </div>
+
+            <form onsubmit="handleDeactivate(event)">
+                <div class="form-group">
+                    <label class="form-label">Mevcut Şifre</label>
+                    <input type="password" class="form-input" id="currentPassword" required 
+                           placeholder="Güvenlik için mevcut şifrenizi girin">
+                </div>
+                <button type="submit" class="setting-button danger">
+                    <i class="fas fa-user-slash"></i> Hesabı Dondur
+                </button>
+            </form>
+
+            <div class="password-requirements">
+                <strong>Güvenlik Uyarısı:</strong>
+                <ul>
+                    <li>Bu işlem için mevcut şifrenizi girmeniz gerekmektedir</li>
+                    <li>İşlem geri alınamaz ve yönetici onayı gerektirir</li>
+                    <li>Tüm verileriniz korunacak ancak erişilemez olacaktır</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

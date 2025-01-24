@@ -1,0 +1,8 @@
+[{
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "isKey.app.tursaf",
+      "sha256_cert_fingerprints": ["37:16:AF:CC:95:23:4B:A6:D0:79:CE:0A:57:CD:BF:A0:88:8D:48:35:DC:2C:07:DD:37:57:DA:C2:58:5F:85:7B"]
+    }
+  }]
